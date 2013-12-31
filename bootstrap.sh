@@ -14,6 +14,7 @@ gem install r10k
 # Populate Puppetfile file
 (
 cat << EOF
+
 # Puppet
 mod 'puppetmaster', :git => 'https://github.com/opticpow/puppet-puppetmaster.git'
 
