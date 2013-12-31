@@ -2,11 +2,11 @@
 
 # Install Puppet on Centos 6.5:
 
-yum update
+yum -y update
 
 # Install Puppet
 rpm -ivh http://yum.puppetlabs.com/el/6/products/i386/puppetlabs-release-6-7.noarch.rpm
-yum install puppet-server
+yum -y install puppet-server
 
 # Install r10k
 gem install r10k
