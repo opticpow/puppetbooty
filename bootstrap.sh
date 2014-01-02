@@ -17,7 +17,7 @@ yum -y update
 
 # Install Puppet
 echo "Install Puppet"
-rpm -ivh http://yum.puppetlabs.com/el/6/products/i386/puppetlabs-release-6-7.noarch.rpm
+rpm -ivh http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
 yum -y install puppet-server git
 
 # Install r10k
@@ -34,23 +34,23 @@ cat << EOF
 mod 'hosts', :git => 'https://github.com/opticpow/puppet-hosts.git'
 mod 'example42/puppet', '2.0.12'
 
-mod 'hunner/hiera'
+#mod 'hunner/hiera'
 
 # Required for example42/puppet
 mod 'example42/puppi', '2.1.6'
-mod 'example42/apache', '2.1.3'
-mod 'example42/mysql', '2.1.1'
+#mod 'example42/apache', '2.1.3'
+#mod 'example42/mysql', '2.1.1'
 
 mod 'zack/r10k', '0.0.7'
 
-mod 'puppetlabs/puppetdb','3.0.0'
+#mod 'puppetlabs/puppetdb','3.0.0'
 
 EOF
 ) > /etc/puppet/Puppetfile
 
 # Install Remote Modules
 echo "Installing Remote Modules"
-PUPPETFILE=/etc/puppet/Puppetfile r10k puppetfile install
+( cd /etc/puppet && r10k puppetfile install )
 
 # site.pp
 (
@@ -78,13 +78,14 @@ node vagrant-centos65 {
   }
 
 }
+EOF
 ) > /etc/puppet/manifests/site.pp
 
 # Hosts file
-rm -f /etc/hosts
-touch /etc/hosts
-puppet apply --modulepath=/etc/puppet/modules -e "include hosts"
-#puppet apply --modulepath=/etc/puppet/modules -e "include puppetmaster"
+#rm -f /etc/hosts
+#touch /etc/hosts
+#puppet apply --modulepath=/etc/puppet/modules -e "include hosts"
+#puppet apply --modulepath=/etc/puppet/modules -e "class { puppet: mode => server, server => 'vagrant-centos65.vagrantup.com', dns_alt_names => 'vagrant-centos65,puppet' }"
 
 #echo "Restarting Service"
 #service puppetmaster restart
