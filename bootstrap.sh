@@ -30,18 +30,18 @@ echo "Creating Puppetfile"
 cat << EOF
 
 # Puppet
-#mod 'puppet', :git => 'https://github.com/opticpow/puppet-puppet.git'
 mod 'hosts', :git => 'https://github.com/opticpow/puppet-hosts.git'
+
+# example42/puppet
 mod 'example42/puppet', '2.0.12'
-
-#mod 'hunner/hiera'
-
-# Required for example42/puppet
 mod 'example42/puppi', '2.1.6'
-#mod 'example42/apache', '2.1.3'
-#mod 'example42/mysql', '2.1.1'
+mod 'example42/apache', '2.1.3'
+mod 'example42/mysql', '2.1.1'
 
+# zack/r10k
 mod 'zack/r10k', '0.0.7'
+mod 'puppetlabs/ruby'
+mod 'puppetlabs/stdlib'
 
 #mod 'puppetlabs/puppetdb','3.0.0'
 
@@ -53,18 +53,28 @@ echo "Installing Remote Modules"
 ( cd /etc/puppet && r10k puppetfile install )
 
 # site.pp
+echo "Creating site.pp"
+hostname=`hostname -s`
+fqdn=`hostname`
+
 (
 cat << EOF
+# Inital site.pp to bootstrap dynamic environments
+notify { "Using bootstrap site.pp. This should not usually be the case!!!": }
 
 node default {
   notify { "!!! NO HOST ENTRY FOUND. PLEASE UPDATE NODES.PP WITH THIS NODE TYPE !!!": }
 }
 
-node vagrant-centos65 {
+node ${hostname} {
   class { 'puppet':
-    mode            => server,
-    server          => 'vagrant-centos65',
-    dns_alt_names   => 'vagrant-centos65,puppet',
+    mode            => 'server',
+    server          => '${hostname}',
+    dns_alt_names   => '${fqdn},puppet',
+    prerun_command  => 'r10k deploy environment -p',
+    module_path     => '$confdir/environments/$environment/modules:$confdir/modules',
+    manifest_path   => '$confdir/environments/$environment/manifests/site.pp:$confdir/manifests/site.pp',
+    runmode         => 'manual',
   }
 
   file { '/etc/puppet/environments/':
@@ -72,6 +82,21 @@ node vagrant-centos65 {
     '/var/cache/r10k':
       ensure => 'directory';
   }
+
+  class {'r10k':
+    version  => '1.1.0',
+    cachedir => '/var/cache/r10k',
+    sources  => {
+      'opticpow'  => {
+        'remote'  => 'https://github.com/opticpow/puppet-mypuppet.git',
+        'basedir' => '/etc/puppet/environments'
+      },
+    },
+    purgedirs => [
+      "/etc/puppet/environments",
+    ],
+  }
+
 
   package {'git':
     ensure => 'present'
@@ -82,14 +107,9 @@ EOF
 ) > /etc/puppet/manifests/site.pp
 
 # Hosts file
-#rm -f /etc/hosts
-#touch /etc/hosts
-#puppet apply --modulepath=/etc/puppet/modules -e "include hosts"
-#puppet apply --modulepath=/etc/puppet/modules -e "class { puppet: mode => server, server => 'vagrant-centos65.vagrantup.com', dns_alt_names => 'vagrant-centos65,puppet' }"
-
-#echo "Restarting Service"
-#service puppetmaster restart
-
-
+rm -f /etc/hosts
+touch /etc/hosts
+puppet apply --modulepath=/etc/puppet/modules -e "include hosts"
+puppet apply --modulepath=/etc/puppet/modules -e "class { puppet: mode => server, server => '`hostname -s`', dns_alt_names => '`hostname`,'`hostname -s`,puppet', runmode => 'manual' }"
 
 
