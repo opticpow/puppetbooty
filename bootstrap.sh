@@ -60,8 +60,6 @@ fqdn=`hostname`
 (
 cat << EOF
 # Inital site.pp to bootstrap dynamic environments
-notify { "Using bootstrap site.pp. This should not usually be the case!!!": }
-
 node default {
   notify { "!!! NO HOST ENTRY FOUND. PLEASE UPDATE NODES.PP WITH THIS NODE TYPE !!!": }
 }
@@ -69,11 +67,13 @@ node default {
 node ${hostname} {
   class { 'puppet':
     mode            => 'server',
-    server          => '${hostname}',
-    dns_alt_names   => '${fqdn},puppet',
-    prerun_command  => 'r10k deploy environment -p',
-    module_path     => '$confdir/environments/$environment/modules:$confdir/modules',
-    manifest_path   => '$confdir/environments/$environment/manifests/site.pp:$confdir/manifests/site.pp',
+    server          => '${fqdn}',
+    dns_alt_names   => '${fqdn},${hostname},puppet',
+    #prerun_command  => 'r10k deploy environment -p',
+    module_path     => '/etc/puppet/environments/master/modules',
+    manifest_path   => '/etc/puppet/environments/master/manifests/site.pp',
+    passenger       => true,
+    environment     => 'master',
     runmode         => 'manual',
   }
 
@@ -84,7 +84,7 @@ node ${hostname} {
   }
 
   class {'r10k':
-    version  => '1.1.0',
+    version  => '1.1.1',
     cachedir => '/var/cache/r10k',
     sources  => {
       'opticpow'  => {
@@ -110,6 +110,21 @@ EOF
 rm -f /etc/hosts
 touch /etc/hosts
 puppet apply --modulepath=/etc/puppet/modules -e "include hosts"
-puppet apply --modulepath=/etc/puppet/modules -e "class { puppet: mode => server, server => '`hostname -s`', dns_alt_names => '`hostname`,'`hostname -s`,puppet', runmode => 'manual' }"
+
+# Bootstrap Puppet
+puppet apply --modulepath=/etc/puppet/modules -e "class { puppet: mode => server, server => '`hostname`', dns_alt_names => '`hostname`,`hostname -s`,puppet', runmode => 'manual' }"
+
+# Now run puppet over site.pp to setup passenger & r10k
+puppet agent --test
+
+# Fix services
+echo "Fixing Services"
+service puppetmaster stop
+service httpd start
+
+# Deploy the environment from git
+echo "Deploying Environment"
+r10k deploy environment -p -v
+
 
 
