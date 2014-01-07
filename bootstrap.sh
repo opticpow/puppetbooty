@@ -114,6 +114,8 @@ puppet apply --modulepath=/etc/puppet/modules -e "include hosts"
 # Bootstrap Puppet
 puppet apply --modulepath=/etc/puppet/modules -e "class { puppet: mode => server, server => '`hostname`', dns_alt_names => '`hostname`,`hostname -s`,puppet', runmode => 'manual' }"
 
+service puppetmaster restart
+
 # Now run puppet over site.pp to setup passenger & r10k
 puppet agent --test
 
@@ -126,5 +128,11 @@ service httpd start
 echo "Deploying Environment"
 r10k deploy environment -p -v
 
+# Cleanup
+echo "Cleaning up Bootstrap crud"
+rm -rf /etc/puppet/modules
+rm -rf /etc/puppet/manifests
+rm -rf /etc/puppet/Puppetfile
 
+echo "Done"
 
