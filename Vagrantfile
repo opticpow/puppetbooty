@@ -55,7 +55,8 @@ Vagrant.configure("2") do |config|
   #
 
   config.vm.define :master do |master|
-    master.vm.box = "centos65-x86_64-20131205"
+    master.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/centos-65-x64-virtualbox-nocm.box"
+    master.vm.box = "centos-65-x64-virtualbox-nocm.box"
     master.vm.network :private_network, ip: "192.168.50.10"
     master.vm.network :forwarded_port, guest: 3000, host: 3000
     master.vm.network :forwarded_port, guest: 8140, host: 8140
@@ -64,7 +65,7 @@ Vagrant.configure("2") do |config|
     #master.vm.synced_folder "modules/modules", "/etc/puppet/modules"
     #master.vm.synced_folder "modules/manifests", "/etc/puppet/manifests"
     #master.vm.provision :shell, :path => "agent-setup.sh", :args => "master"
-    master.vm.provision :shell, :path => "puppetbooty.sh", :args => "--type master --hostname master --proxy"
+    master.vm.provision :shell, :path => "puppetbooty.sh", :args => "--type master --hostname master"
   end
 
   config.vm.define :centos do |centos|
