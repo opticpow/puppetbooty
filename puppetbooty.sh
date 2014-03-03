@@ -48,6 +48,12 @@ date > $logfile
 function usage()
 {
     warning "Usage:\n    $0 --type [master | agent --master <hostname>] [--proxy] [--update] [--hostname <hostname>]"
+    warning "\n"
+    warning "    --type     Install type, either a master or agent server"
+    warning "    --master   For agent installations, the IP of the master server"
+    warning "    --proxy    If a proxy server is required for http to the internet"
+    warning "    --update   Apply all OS patches"
+    warning "    --hostname Set the hostname"
     exit 0
 }
 
@@ -221,8 +227,10 @@ warning "We are running on $os"
 # Hosts file
 notice "Basic Server Configuration"
 
+# Check to see if the user supplied a hostname on the cmdline
 if [[ -z $hostname ]]
 then
+    # TODO: Nope, lets set it to the type of install. This should be better..
     hostname=$Type
 fi
 
