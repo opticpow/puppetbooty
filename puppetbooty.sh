@@ -1,5 +1,15 @@
 #!/bin/bash
 ################################################################################
+#
+# puppetboot.sh - A script to boo strap puppet on a minimal server
+#
+# https://github.com/opticpow/puppetbooty
+#
+# Copyright 2014 Wayne Ingram
+#
+# License https://github.com/opticpow/puppetbooty/LICENSE
+#
+################################################################################
 # Setup ANSI Colours
 
 RCol='\e[0m' # Text Reset
