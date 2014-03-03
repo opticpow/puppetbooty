@@ -22,9 +22,9 @@ Examples
 --------
 bootstrap a puppet master:
 
-puppetbooty.sh --type master
+  puppetbooty.sh --type master
 
 bootstrap a puppet client with the master server ip 192.168.1.10
 
-puppetbooty.sh --type agent --master 192.168.1.10
+  puppetbooty.sh --type agent --master 192.168.1.10
 
