@@ -47,7 +47,7 @@ date > $logfile
 # Some Handy Functions
 function usage()
 {
-    warning "Usage:\n    $0 --type [master | agent --master <hostname>] [--proxy] [--update] [--hostname <hostname>]"
+    warning "Usage:\n    $0 --type [master | agent --master <hostname>] [--proxy <url>] [--update] [--hostname <hostname>]"
     warning "\n"
     warning "    --type     Install type, either a master or agent server"
     warning "    --master   For agent installations, the IP of the master server"
@@ -173,7 +173,7 @@ warning "Executing PuppetBooty Provisioner script"
 # Process Command Line Arguments
 # NOTE: This requires GNU getopt.
 
-ARGS=$(getopt -o h:t:m:pu --long hostname:,type:,master:,proxy,update -n "$0" -- "$@")
+ARGS=$(getopt -o h:t:m:p:u --long hostname:,type:,master:,proxy:,update -n "$0" -- "$@")
 
 # Bad Arguments
 if [ $? != 0 ]
@@ -190,7 +190,7 @@ while true; do
         -h | --hostname) hostname="$2"; shift 2 ;;
         -t | --type)     Type="$2"; shift 2 ;;
         -m | --master)   Master="$2"; shift 2 ;;
-        -p | --proxy)    Proxy="True"; shift ;;
+        -p | --proxy)    Proxy="$2"; shift ;;
         -u | --update)   Update="True"; shift ;;
         -- ) shift; break ;;
         * ) break ;;
@@ -253,18 +253,18 @@ docmd "Restarting Network" "service network restart"
 ################################################################################
 # Setup Proxy
 
-if [[ $Proxy == "True" ]]
+if [[ -n $Proxy ]]
 then
 	notice "Setting up Proxy"
-	dorpminst /vagrant/cntlm/cntlm*rpm
-	docmd "Installing Config file" "cp /vagrant/cntlm/cntlm.conf /etc"
-	docmd "Starting Proxy service" "service cntlmd start"
+	#dorpminst /vagrant/cntlm/cntlm*rpm
+	#docmd "Installing Config file" "cp /vagrant/cntlm/cntlm.conf /etc"
+	#docmd "Starting Proxy service" "service cntlmd start"
 
-	export http_proxy="http://localhost:3128"
-	export https_proxy=$http_proxy
+	export http_proxy=$Proxy
+	export https_proxy=$Proxy
 
-	echo 'export http_proxy="http://localhost:3128"' >> /etc/bashrc
-	echo 'export https_proxy="http://localhost:3128"' >> /etc/bashrc
+	echo "export http_proxy=\$Proxy\""  >> /etc/bashrc
+	echo "export http$_proxy=\$Proxy\"" >> /etc/bashrc
 
 fi
 
