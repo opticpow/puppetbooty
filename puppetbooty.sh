@@ -47,13 +47,15 @@ date > $logfile
 # Some Handy Functions
 function usage()
 {
-    warning "Usage:\n    $0 --type [master | agent --master <hostname>] [--proxy <url>] [--update] [--hostname <hostname>]"
-    warning "\n"
-    warning "    --type     Install type, either a master or agent server"
-    warning "    --master   For agent installations, the IP of the master server"
-    warning "    --proxy    If a proxy server is required for http to the internet"
-    warning "    --update   Apply all OS patches"
-    warning "    --hostname Set the hostname"
+    echo -e "\n${Yel}"
+    echo -e "Usage:\n    $0 --type [master | agent --master <hostname>] [--proxy <url>] [--update] [--hostname <hostname>]"
+    echo -e "\n"
+    echo -e "    --type     Install type, either a master or agent server"
+    echo -e "    --master   For agent installations, the IP of the master server"
+    echo -e "    --proxy    If a proxy server is required for http to the internet"
+    echo -e "    --update   Apply all OS patches"
+    echo -e "    --hostname Set the hostname"
+    echo -e "${RCol}\n"
     exit 0
 }
 
